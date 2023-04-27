@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "708268529413",
+    "firebase_url": "https://grh-and-indriver-default-rtdb.firebaseio.com",
+    "project_id": "grh-and-indriver",
+    "storage_bucket": "grh-and-indriver.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:708268529413:android:abe8e8f464b9f7d1fe096c",
+        "android_client_info": {
+          "package_name": "com.team.driversapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "708268529413-bgoboau0t6nadrapjvciermjqa8fqucu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAegsY1fpTItqZxITu7kyq4TCoHghrPE68"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "708268529413-bgoboau0t6nadrapjvciermjqa8fqucu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
