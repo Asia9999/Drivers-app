@@ -56,7 +56,7 @@ class _MySplashScreanState extends State<MySplashScrean> {
            const Text(
               "Welcome to Group Ride Hailing",
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                   color: Colors.black,
                   fontFamily: 'Sigmar',
                   fontWeight: FontWeight.bold
