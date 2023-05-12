@@ -75,7 +75,7 @@ class _HomeTabPageState extends State<HomeTabPage>
   {
     currentFirebaseUser = fAuth.currentUser;
     PushNotificationSystem pushNotificationSystem = PushNotificationSystem();
-    pushNotificationSystem.initializeCloudMessaging();
+    pushNotificationSystem.initializeCloudMessaging(context);
     pushNotificationSystem.generateAndGetToken();
   }
 

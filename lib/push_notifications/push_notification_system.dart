@@ -1,13 +1,16 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../global/global.dart';
 import '../models/user_ride_request_information.dart';
+import 'notification_dialog_box.dart';
 class PushNotificationSystem{
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  Future initializeCloudMessaging() async{
+  Future initializeCloudMessaging(BuildContext context) async{
 
     //1. Terminated
     //When the app is completely closed and opened directly from the push notification
@@ -15,7 +18,7 @@ class PushNotificationSystem{
     {
       if (remoteMessage != null) {
         //display ride request information - user information who request a ride
-        readUserRideRequestInformation(remoteMessage.data["rideRequestId"],);
+        readUserRideRequestInformation(remoteMessage.data["rideRequestId"],context);
       }
     });
     //2. Foreground
@@ -24,7 +27,7 @@ class PushNotificationSystem{
     {
 
       //display ride request information - user information who request a ride
-      readUserRideRequestInformation(remoteMessage!.data["rideRequestId"], );
+      readUserRideRequestInformation(remoteMessage!.data["rideRequestId"],context );
     });
 
     //3. Background
@@ -33,12 +36,11 @@ class PushNotificationSystem{
     {
 
       //display ride request information - user information who request a ride
-      readUserRideRequestInformation(remoteMessage!.data["rideRequestId"], );
+      readUserRideRequestInformation(remoteMessage!.data["rideRequestId"],context );
     });
   }
 
-  readUserRideRequestInformation(String userRideRequestId//, BuildContext context
-      )
+  readUserRideRequestInformation(String userRideRequestId, BuildContext context)
   {
     FirebaseDatabase.instance.ref()
         .child("All Ride Requests")
@@ -72,15 +74,12 @@ class PushNotificationSystem{
         userRideRequestDetails.userName = userName;
         userRideRequestDetails.userPhone = userPhone;
 
-        print("user Ride request information");
-        print(userRideRequestDetails.userName);
-        print(userRideRequestDetails.userPhone);
-        print(userRideRequestDetails.originAddress);
-        print(userRideRequestDetails.destinationAddress);
-
-
-
-
+        showDialog(
+            context: context,
+            builder: (BuildContext context) => NotificationDialogBox(
+             userRideRequestDetails: userRideRequestDetails,
+            ),
+        );
       }
       else
       {
