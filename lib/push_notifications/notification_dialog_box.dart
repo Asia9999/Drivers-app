@@ -1,6 +1,8 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../global/global.dart';
 import '../models/user_ride_request_information.dart';
 
 class NotificationDialogBox extends StatefulWidget
@@ -139,9 +141,9 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
                     ),
                     onPressed: ()
                     {
-                      // audioPlayer.pause();
-                      // audioPlayer.stop();
-                      // audioPlayer = AssetsAudioPlayer();
+                       audioPlayer.pause();
+                       audioPlayer.stop();
+                       audioPlayer = AssetsAudioPlayer();
 
                       //cancel the rideRequest
 
@@ -163,9 +165,9 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
                     ),
                     onPressed: ()
                     {
-                      //audioPlayer.pause();
-                     // audioPlayer.stop();
-                      //audioPlayer = AssetsAudioPlayer();
+                      audioPlayer.pause();
+                      audioPlayer.stop();
+                      audioPlayer = AssetsAudioPlayer();
 
                       //accept the rideRequest
 
