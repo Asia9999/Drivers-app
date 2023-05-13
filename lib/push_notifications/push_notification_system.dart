@@ -9,8 +9,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../global/global.dart';
 import '../models/user_ride_request_information.dart';
 import 'notification_dialog_box.dart';
+
+
 class PushNotificationSystem{
+
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+
   Future initializeCloudMessaging(BuildContext context) async{
 
     //1. Terminated
@@ -28,7 +32,7 @@ class PushNotificationSystem{
     {
 
       //display ride request information - user information who request a ride
-      readUserRideRequestInformation(remoteMessage!.data["rideRequestId"],context );
+      readUserRideRequestInformation(remoteMessage!.data["rideRequestId"], context);
     });
 
     //3. Background
@@ -37,7 +41,7 @@ class PushNotificationSystem{
     {
 
       //display ride request information - user information who request a ride
-      readUserRideRequestInformation(remoteMessage!.data["rideRequestId"],context );
+      readUserRideRequestInformation(remoteMessage!.data["rideRequestId"], context);
     });
   }
 
@@ -51,8 +55,8 @@ class PushNotificationSystem{
     {
       if(snapData.snapshot.value != null)
       {
-         audioPlayer.open(Audio("music/music_notification.mp3"));
-         audioPlayer.play();
+        audioPlayer.open(Audio("music/music_notification.mp3"));
+        audioPlayer.play();
 
         double originLat = double.parse((snapData.snapshot.value! as Map)["origin"]["latitude"]);
         double originLng = double.parse((snapData.snapshot.value! as Map)["origin"]["longitude"]);
@@ -64,6 +68,9 @@ class PushNotificationSystem{
 
         String userName = (snapData.snapshot.value! as Map)["userName"];
         String userPhone = (snapData.snapshot.value! as Map)["userPhone"];
+
+        String? rideRequestId = snapData.snapshot.key;
+
         UserRideRequestInformation userRideRequestDetails = UserRideRequestInformation();
 
         userRideRequestDetails.originLatLng = LatLng(originLat, originLng);
@@ -75,11 +82,13 @@ class PushNotificationSystem{
         userRideRequestDetails.userName = userName;
         userRideRequestDetails.userPhone = userPhone;
 
+        userRideRequestDetails.rideRequestId = rideRequestId;
+
         showDialog(
-            context: context,
-            builder: (BuildContext context) => NotificationDialogBox(
-             userRideRequestDetails: userRideRequestDetails,
-            ),
+          context: context,
+          builder: (BuildContext context) => NotificationDialogBox(
+            userRideRequestDetails: userRideRequestDetails,
+          ),
         );
       }
       else
@@ -90,7 +99,7 @@ class PushNotificationSystem{
   }
 
 
-        Future generateAndGetToken() async
+  Future generateAndGetToken() async
   {
     String? registrationToken = await messaging.getToken();
     print("FCM Registration Token: ");

@@ -63,9 +63,8 @@ class _MySplashScreanState extends State<MySplashScrean> {
               ),
             ),
             const Text(
-              "                                     "
-                  "  A ride is just a click away Share "
-                  "  your ride at the lowest cost ",
+              "\n\nA ride is just a click away Share\n "
+                  " your ride at the lowest cost ",
               style: TextStyle(
                   fontSize: 18,
                   color: Colors.black,

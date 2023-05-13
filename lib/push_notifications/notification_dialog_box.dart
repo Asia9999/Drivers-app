@@ -1,9 +1,13 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:drivers_app/global/global.dart';
+import 'package:drivers_app/mainScreens/new_trip_screen.dart';
+import 'package:drivers_app/models/user_ride_request_information.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/src/material/colors.dart';
+import '../assistants/assistant_methods.dart';
 
-import '../global/global.dart';
-import '../models/user_ride_request_information.dart';
 
 class NotificationDialogBox extends StatefulWidget
 {
@@ -22,7 +26,6 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
 {
   @override
   Widget build(BuildContext context)
-
   {
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -56,7 +59,7 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 22,
-                  color: Colors.grey
+                  color:Colors.grey
               ),
             ),
 
@@ -165,13 +168,18 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
                     ),
                     onPressed: ()
                     {
+
                       audioPlayer.pause();
                       audioPlayer.stop();
                       audioPlayer = AssetsAudioPlayer();
 
-                      //accept the rideRequest
 
-                      Navigator.pop(context);
+
+                      //accept the rideRequest
+                      acceptRideRequest(context);
+
+
+                      //Navigator.pop(context);
                     },
                     child: Text(
                       "Accept".toUpperCase(),
@@ -189,4 +197,44 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
       ),
     );
   }
+  acceptRideRequest(BuildContext context)
+  {
+    String getRideRequestId="";
+    FirebaseDatabase.instance.ref()
+        .child("drivers")
+        .child(currentFirebaseUser!.uid)
+        .child("newRideStatus")
+        .once()
+        .then((snap)
+    {
+      if(snap.snapshot.value != null)
+      {
+        getRideRequestId = snap.snapshot.value.toString();
+      }
+      else
+      {
+        Fluttertoast.showToast(msg: "This ride request do not exists.");
+      }
+
+      if(getRideRequestId == widget.userRideRequestDetails!.rideRequestId)
+      {
+        FirebaseDatabase.instance.ref()
+            .child("drivers")
+            .child(currentFirebaseUser!.uid)
+            .child("newRideStatus")
+            .set("accepted");
+
+        AssistantMethods.pauseLiveLocationUpdates();
+
+        //trip started now - send driver to new tripScreen
+         Navigator.push(context, MaterialPageRoute(builder: (c)=> NewTripScreen(
+           userRideRequestDetails: widget.userRideRequestDetails,
+         )
+         ));
+      }else {
+        Fluttertoast.showToast(msg: "This Ride Request do not exists.");
+      }
+    });
+  }
+
 }
