@@ -4,6 +4,7 @@ import 'package:drivers_app/mainScreens/new_trip_screen.dart';
 import 'package:drivers_app/models/user_ride_request_information.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/src/material/colors.dart';
 import '../assistants/assistant_methods.dart';
@@ -149,9 +150,37 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
                        audioPlayer = AssetsAudioPlayer();
 
                       //cancel the rideRequest
+                    FirebaseDatabase.instance.ref()
+                        .child("All Ride Requests")
+                        .child(widget.userRideRequestDetails!.rideRequestId!)
+                        .remove().then((value)
+                    {
+                    FirebaseDatabase.instance.ref()
+                        .child("drivers")
+                        .child(currentFirebaseUser!.uid)
+                        .child("newRideStatus")
+                        .set("idle");
+                    }).then((value)
+                    {
+                    FirebaseDatabase.instance.ref()
+                        .child("drivers")
+                        .child(currentFirebaseUser!.uid)
+                        .child("tripsHistory")
+                        .child(widget.userRideRequestDetails!.rideRequestId!)
+                        .remove();
+                    }).then((value)
+                    {
+                    Fluttertoast.showToast(msg: "Ride Request has been Cancelled, Successfully. Restart App Now.");
+                    });
 
-                      Navigator.pop(context);
+                    Future.delayed(const Duration(milliseconds: 3000), ()
+                    {
+                      SystemNavigator.pop();
+                    });
                     },
+
+                     // Navigator.pop(context);
+
                     child: Text(
                       "Cancel".toUpperCase(),
                       style: const TextStyle(
@@ -173,13 +202,9 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
                       audioPlayer.stop();
                       audioPlayer = AssetsAudioPlayer();
 
-
-
                       //accept the rideRequest
                       acceptRideRequest(context);
 
-
-                      //Navigator.pop(context);
                     },
                     child: Text(
                       "Accept".toUpperCase(),
@@ -224,7 +249,7 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox>
             .child("newRideStatus")
             .set("accepted");
 
-        AssistantMethods.pauseLiveLocationUpdates();
+         AssistantMethods.pauseLiveLocationUpdates();
 
         //trip started now - send driver to new tripScreen
          Navigator.push(context, MaterialPageRoute(builder: (c)=> NewTripScreen(
