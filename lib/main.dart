@@ -1,23 +1,22 @@
-//import 'dart:js';
-
 import 'package:drivers_app/infoHandler/app_info.dart';
 import 'package:drivers_app/splashScrean/splash_screan.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() async
-{
+GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(
-     MyApp(
-      child:ChangeNotifierProvider(
-        create:(context)=>AppInfo(),
+    MyApp(
+      child: ChangeNotifierProvider(
+        create: (context) => AppInfo(),
         child: MaterialApp(
           title: 'Drivers App',
+          navigatorKey: navigatorKey,
           theme: ThemeData(
-
             primarySwatch: Colors.purple,
           ),
           home: const MySplashScrean(),
@@ -25,19 +24,17 @@ void main() async
           debugShowCheckedModeBanner: false,
         ),
       ),
-     ),
+    ),
   );
 }
 
-class MyApp extends StatefulWidget
-{
- final Widget? child;
- MyApp({this.child});
+class MyApp extends StatefulWidget {
+  final Widget? child;
+  MyApp({this.child});
 
-static void restartApp(BuildContext context)
-{
-  context.findAncestorStateOfType<_MyAppState>()!.restartApp();
-}
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_MyAppState>()!.restartApp();
+  }
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -45,18 +42,17 @@ static void restartApp(BuildContext context)
 
 class _MyAppState extends State<MyApp> {
   Key key = UniqueKey();
-  void restartApp(){
+  void restartApp() {
     setState(() {
-     key = UniqueKey();
+      key = UniqueKey();
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return KeyedSubtree(
-      key:key,
+      key: key,
       child: widget.child!,
     );
   }
 }
-
-
