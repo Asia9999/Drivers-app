@@ -13,6 +13,7 @@ class Ticket {
   String? humanReadableDestination;
   GeoPoint? driverLocation;
   int? timer;
+  double? price;
 
   Ticket({
     required this.time,
@@ -45,6 +46,7 @@ class Ticket {
     humanReadableDestination = data['humanReadableDestination'];
     driverLocation = data['driverLocation'];
     timer = data['timer'];
+    price = data['price'];
   }
 
   Map<String, dynamic> toMap() {
@@ -61,6 +63,7 @@ class Ticket {
       'driverId': driverId ?? "00",
       'driverLocation': driverLocation ?? GeoPoint(0, 0),
       'timer': timer ?? 15,
+      'price': price ?? 0.0,
     };
   }
 }

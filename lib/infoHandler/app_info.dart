@@ -50,7 +50,7 @@ class AppInfo extends ChangeNotifier {
   var geoLocator = Geolocator();
   Position? onlineDriverCurrentPosition;
 
-  String rideRequestStatus = "accepted";
+  String rideRequestStatus = "arrived";
 
   String durationFromOriginToDestination = "";
 
@@ -341,6 +341,12 @@ class AppInfo extends ChangeNotifier {
         totalFareAmount: totalFareAmount,
       ),
     );
+
+    ticket!.status = "arrived";
+    ticket!.price = totalFareAmount;
+
+    updateTicket(ticket!);
+
     //save fare amount to driver total earnings
     saveFareAmountToDriverEarnings(totalFareAmount);
   }
@@ -846,9 +852,10 @@ class AppInfo extends ChangeNotifier {
                           ),
                         );
 
-                        await drawPolyLineFromOriginToDestination(
-                            userRideRequestDetails!.originLatLng!,
-                            userRideRequestDetails!.destinationLatLng!);
+                        // await drawPolyLineFromOriginToDestination(
+                        //     LatLng(ticket!.driverLocation!.latitude,
+                        //         ticket!.driverLocation!.longitude),
+                        //     userRideRequestDetails!.destinationLatLng!);
 
                         Navigator.pop(navigatorKey.currentContext!);
                       }
