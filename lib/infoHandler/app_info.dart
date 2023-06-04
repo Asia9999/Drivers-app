@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:js';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drivers_app/main.dart';
@@ -412,19 +411,16 @@ class AppInfo extends ChangeNotifier {
 
   // Ticket Stuff
 
-  acceptTicket(Ticket ticket) async {
-    existTicket = ticket;
+  acceptTicket(Ticket tick) async {
+    existTicket = ticket = tick;
 
-    await FirebaseFirestore.instance
-        .collection("Tickets")
-        .doc(ticket.id)
-        .update({
+    await FirebaseFirestore.instance.collection("Tickets").doc(tick.id).update({
       "driverLocation": GeoPoint(
           driverCurrentPosition!.latitude, driverCurrentPosition!.longitude),
     });
     startTimerTicket();
     updatePassengersIconOnMap();
-    subscribeToTicket(ticket);
+    subscribeToTicket(tick);
 
     notifyListeners();
   }
@@ -439,26 +435,26 @@ class AppInfo extends ChangeNotifier {
         log("event: ${event.data()}");
         if (event.data() != null) {
           var data = event.data()!;
-          existTicket = Ticket.fromMap(data, event.id);
+          ticket = Ticket.fromMap(data, event.id);
 
-          if (existTicket!.status == "Pending") {
+          if (ticket!.status == "Pending") {
             // showWaitingResponseFromDriverUI();
-          } else if (existTicket!.status == 'collecting') {
+          } else if (ticket!.status == 'collecting') {
             updatePassengersIconOnMap();
             showUIForCollectingTicket();
 
             // showOtherPassengersOnMap();
             // showUIForAssignedDriverInfo();
-          } else if (existTicket!.status == 'started') {
+          } else if (ticket!.status == 'started') {
             updateReachingTimeToUserDropOffLocation(LatLng(
                 ticket!.driverLocation!.latitude,
                 ticket!.driverLocation!.longitude));
             showUIForStartedTicket();
             // showUIForStartedTrip();
-          } else if (existTicket!.status == "Cancelled") {
+          } else if (ticket!.status == "Cancelled") {
             // showUICancelledTicket();
 
-            cancelTicket(existTicket!);
+            cancelTicket(ticket!);
             Fluttertoast.showToast(
                 msg: "The ticket is cancelled",
                 toastLength: Toast.LENGTH_SHORT,
@@ -512,79 +508,79 @@ class AppInfo extends ChangeNotifier {
             children: [
               SizedBox(
                   width: double.infinity,
-                  height: 300,
+                  height: 100,
                   child: ListView.builder(
                     itemBuilder: (context, i) {
                       return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(ticket!.passengers![i].name),
-                          Center(
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                //call driver
-
-                                // launch("tel://" + ticketDriver!.phone);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.purple,
-                              ),
-                              icon: const Icon(
-                                Icons.phone_android,
+                          Text(ticket!.passengers![i].name,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                size: 22,
-                              ),
-                              label: const Text(
-                                "Call",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              )),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              //call driver
+
+                              // launch("tel://" + ticketDriver!.phone);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.purple,
+                            ),
+                            icon: const Icon(
+                              Icons.phone_android,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                            label: const Text(
+                              "Call",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                           ticket!.passengers![i].isPickedUp
-                              ? Center(
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      //cancel ticket
-                                      // resignFromTicket();
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.purple,
-                                    ),
-                                    icon: const Icon(
-                                      Icons.pin_drop,
-                                      color: Colors.red,
-                                      size: 22,
-                                    ),
-                                    label: const Text(
-                                      "Picked Up",
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              ? ElevatedButton.icon(
+                                  onPressed: () {
+                                    //cancel ticket
+                                    // resignFromTicket();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.purple,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.pin_drop,
+                                    color: Colors.red,
+                                    size: 22,
+                                  ),
+                                  label: const Text(
+                                    "Picked Up",
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 )
-                              : Center(
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      pickUpPassenger(ticket!.passengers![i]);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.purple,
-                                    ),
-                                    icon: const Icon(
-                                      Icons.pin_drop,
-                                      color: Colors.red,
-                                      size: 22,
-                                    ),
-                                    label: const Text(
-                                      "Pick Up",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                              : ElevatedButton.icon(
+                                  onPressed: () {
+                                    pickUpPassenger(ticket!.passengers![i]);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.purple,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.pin_drop,
+                                    color: Colors.red,
+                                    size: 22,
+                                  ),
+                                  label: const Text(
+                                    "Pick Up",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
@@ -660,7 +656,7 @@ class AppInfo extends ChangeNotifier {
 
               const SizedBox(height: 20.0),
 
-              //user DropOff Address with icon
+              // user DropOff Address with icon
               Row(
                 children: [
                   Image.asset(
@@ -684,90 +680,12 @@ class AppInfo extends ChangeNotifier {
                   ),
                 ],
               ),
-
-              const SizedBox(
-                height: 24,
-              ),
-
-              const Divider(
-                thickness: 2,
-                height: 2,
-                color: Colors.grey,
-              ),
-
-              const SizedBox(height: 10.0),
-
-              ElevatedButton.icon(
-                onPressed: () async {
-                  //[driver has arrived at user PickUp Location] - Arrived Button
-                  if (rideRequestStatus == "accepted") {
-                    rideRequestStatus = "arrived";
-
-                    FirebaseDatabase.instance
-                        .ref()
-                        .child("All Ride Requests")
-                        .child(userRideRequestDetails!.rideRequestId!)
-                        .child("status")
-                        .set(rideRequestStatus);
-
-                    buttonTitle = "Let's Go"; //start the trip
-                    buttonColor = Colors.lightGreen;
-
-                    showDialog(
-                      context: navigatorKey.currentContext!,
-                      barrierDismissible: false,
-                      builder: (BuildContext c) => ProgressDialog(
-                        message: "Loading...",
-                      ),
-                    );
-
-                    await drawPolyLineFromOriginToDestination(
-                        userRideRequestDetails!.originLatLng!,
-                        userRideRequestDetails!.destinationLatLng!);
-
-                    Navigator.pop(navigatorKey.currentContext!);
-                  }
-                  //[user has already sit in driver's car. Driver start trip now] - Lets Go Button
-                  else if (rideRequestStatus == "arrived") {
-                    rideRequestStatus = "ontrip";
-
-                    FirebaseDatabase.instance
-                        .ref()
-                        .child("All Ride Requests")
-                        .child(userRideRequestDetails!.rideRequestId!)
-                        .child("status")
-                        .set(rideRequestStatus);
-
-                    buttonTitle = "End Trip"; //end the trip
-                    buttonColor = Colors.redAccent;
-                  }
-                  //[user/Driver reached to the dropOff Destination Location] - End Trip Button
-                  else if (rideRequestStatus == "ontrip") {
-                    endTripNow();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  primary: buttonColor,
-                ),
-                icon: const Icon(
-                  Icons.directions_car,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                label: Text(
-                  buttonTitle!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
       ),
     );
+    notifyListeners();
   }
 
   showUIForStartedTicket() {
@@ -796,7 +714,7 @@ class AppInfo extends ChangeNotifier {
                 child: Column(children: [
                   //duration
                   Text(
-                    durationFromOriginToDestination,
+                    timeToArrive!,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -891,7 +809,85 @@ class AppInfo extends ChangeNotifier {
                         ),
                       ),
                     )
-                  ])
+                  ]),
+                  const SizedBox(
+                    height: 24,
+                  ),
+
+                  const Divider(
+                    thickness: 2,
+                    height: 2,
+                    color: Colors.grey,
+                  ),
+
+                  const SizedBox(height: 10.0),
+
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      //[driver has arrived at user PickUp Location] - Arrived Button
+                      if (rideRequestStatus == "accepted") {
+                        rideRequestStatus = "arrived";
+
+                        FirebaseDatabase.instance
+                            .ref()
+                            .child("All Ride Requests")
+                            .child(userRideRequestDetails!.rideRequestId!)
+                            .child("status")
+                            .set(rideRequestStatus);
+
+                        buttonTitle = "Let's Go"; //start the trip
+                        buttonColor = Colors.lightGreen;
+
+                        showDialog(
+                          context: navigatorKey.currentContext!,
+                          barrierDismissible: false,
+                          builder: (BuildContext c) => ProgressDialog(
+                            message: "Loading...",
+                          ),
+                        );
+
+                        await drawPolyLineFromOriginToDestination(
+                            userRideRequestDetails!.originLatLng!,
+                            userRideRequestDetails!.destinationLatLng!);
+
+                        Navigator.pop(navigatorKey.currentContext!);
+                      }
+                      //[user has already sit in driver's car. Driver start trip now] - Lets Go Button
+                      else if (rideRequestStatus == "arrived") {
+                        rideRequestStatus = "ontrip";
+
+                        FirebaseDatabase.instance
+                            .ref()
+                            .child("All Ride Requests")
+                            .child(userRideRequestDetails!.rideRequestId!)
+                            .child("status")
+                            .set(rideRequestStatus);
+
+                        buttonTitle = "End Trip"; //end the trip
+                        buttonColor = Colors.redAccent;
+                      }
+                      //[user/Driver reached to the dropOff Destination Location] - End Trip Button
+                      else if (rideRequestStatus == "ontrip") {
+                        endTripNow();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: buttonColor,
+                    ),
+                    icon: const Icon(
+                      Icons.directions_car,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    label: Text(
+                      buttonTitle!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ]))));
   }
 
@@ -899,11 +895,11 @@ class AppInfo extends ChangeNotifier {
 
   updateReachingTimeToUserDropOffLocation(driverCurrentPositionLatLng) async {
     if (ticket != null) {
-      var dropOffLocation = userDropOffLocation;
+      var dropOffLocation = ticket!.destination;
+      print("dropOffLocation: ${dropOffLocation!.latitude}");
 
-      LatLng userDestinationPosition = LatLng(
-          dropOffLocation!.locationLatitude!,
-          dropOffLocation!.locationLongitude!);
+      LatLng userDestinationPosition =
+          LatLng(dropOffLocation!.latitude!, dropOffLocation!.longitude!);
 
       var directionDetailsInfo =
           await AssistantMethods.obtainOriginToDestinationDirectionDetails(
@@ -915,7 +911,7 @@ class AppInfo extends ChangeNotifier {
         return;
       }
 
-      timeToArrive = "Arrive in :: $timeToArrive ";
+      timeToArrive = "Arrive in :: ${directionDetailsInfo.duration_text} ";
 
       notifyListeners();
     }
@@ -925,12 +921,12 @@ class AppInfo extends ChangeNotifier {
     _ticketSnapshot?.cancel();
   }
 
-  void updateTicket(Ticket ticket) {
-    existTicket = ticket;
+  void updateTicket(Ticket tick) {
+    existTicket = ticket = tick;
     FirebaseFirestore.instance
         .collection("Tickets")
-        .doc(ticket.id)
-        .update(ticket.toMap());
+        .doc(tick.id)
+        .update(tick.toMap());
     notifyListeners();
   }
 
@@ -945,7 +941,22 @@ class AppInfo extends ChangeNotifier {
 
   pickUpPassenger(Passenger passenger) {
     passenger.isPickedUp = true;
+
+    if (ticket!.passengers!.every((element) => element.isPickedUp == true)) {
+      ticket!.status = "started";
+
+      setOfMarkers.clear();
+      setOfCircle.clear();
+      setOfPolyline.clear();
+      polyLinePositionCoordinates.clear();
+      drawPolyLineFromOriginToDestination(
+          LatLng(ticket!.driverLocation!.latitude,
+              ticket!.driverLocation!.longitude),
+          LatLng(
+              ticket!.destination!.latitude, ticket!.destination!.longitude));
+    }
     updateTicket(ticket!);
+
     notifyListeners();
   }
 
@@ -956,7 +967,6 @@ class AppInfo extends ChangeNotifier {
         return;
       }
       if (ticket!.status == "collecting") {
-        
         List p = [];
         List? pp;
 
