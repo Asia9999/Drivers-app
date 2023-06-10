@@ -107,6 +107,8 @@ class AssistantMethods {
     //USD
     double totalFareAmount = timeTraveledFareAmountPerMinute +
         distanceTraveledFareAmountPerKilometer;
+
+    totalFareAmount = totalFareAmount * 10;
     if (driverVehicleType == "car-3seats") {
       double resultFareAmount = (totalFareAmount.truncate()) / 2.0;
       return resultFareAmount;

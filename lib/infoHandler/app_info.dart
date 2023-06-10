@@ -13,6 +13,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../assistants/assistant_methods.dart';
 import '../global/global.dart';
@@ -80,6 +81,10 @@ class AppInfo extends ChangeNotifier {
 
   drawPolyLineFromOriginToDestination(
       LatLng originLatLng, LatLng destinationLatLng) async {
+    setOfCircle.clear();
+    setOfPolyline.clear();
+    polyLinePositionCoordinates.clear();
+
     var directionDetailsInfo =
         await AssistantMethods.obtainOriginToDestinationDirectionDetails(
             originLatLng, destinationLatLng);
@@ -89,9 +94,7 @@ class AppInfo extends ChangeNotifier {
 
     PolylinePoints pPoints = PolylinePoints();
     List<PointLatLng> decodedPolyLinePointsResultList =
-        pPoints.decodePolyline(directionDetailsInfo!.e_points!);
-
-    polyLinePositionCoordinates.clear();
+        pPoints.decodePolyline(directionDetailsInfo.e_points!);
 
     if (decodedPolyLinePointsResultList.isNotEmpty) {
       decodedPolyLinePointsResultList.forEach((PointLatLng pointLatLng) {
@@ -99,8 +102,6 @@ class AppInfo extends ChangeNotifier {
             .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
       });
     }
-
-    setOfPolyline.clear();
 
     Polyline polyline = Polyline(
       color: Colors.purpleAccent,
@@ -189,6 +190,7 @@ class AppInfo extends ChangeNotifier {
   }
 
   updatePassengersIconOnMap() {
+    setOfMarkers.clear();
     if (ticket!.passengers!.isNotEmpty) {
       controllerGoogleMap.future.then((value) {
         ticket!.passengers!.forEach((passenger) {
@@ -308,20 +310,13 @@ class AppInfo extends ChangeNotifier {
       onlineDriverCurrentPosition!.latitude,
       onlineDriverCurrentPosition!.longitude,
     );
-    var tripDirectionDetails =
-        await AssistantMethods.obtainOriginToDestinationDirectionDetails(
-            currentDriverPositionLatLng, userRideRequestDetails!.originLatLng!);
-    //fare amount
-    double totalFareAmount =
-        AssistantMethods.calculateFareAmountFromOriginToDestination(
-            tripDirectionDetails!);
 
     FirebaseDatabase.instance
         .ref()
         .child("All Ride Requests")
         .child(userRideRequestDetails!.rideRequestId!)
         .child("fareAmount")
-        .set(totalFareAmount.toString());
+        .set(ticket!.price!.toString());
 
     FirebaseDatabase.instance
         .ref()
@@ -338,17 +333,19 @@ class AppInfo extends ChangeNotifier {
     showDialog(
       context: navigatorKey.currentContext!,
       builder: (BuildContext c) => FareAmountCollectionDialog(
-        totalFareAmount: totalFareAmount,
+        totalFareAmount: ticket!.price!,
       ),
-    );
+    ).then((value) {
+      ticketInfoWidget = Container();
+      notifyListeners();
+    });
 
     ticket!.status = "arrived";
-    ticket!.price = totalFareAmount;
 
     updateTicket(ticket!);
 
     //save fare amount to driver total earnings
-    saveFareAmountToDriverEarnings(totalFareAmount);
+    saveFareAmountToDriverEarnings(ticket!.price!);
   }
 
   saveFareAmountToDriverEarnings(double totalFareAmount) {
@@ -420,9 +417,19 @@ class AppInfo extends ChangeNotifier {
   acceptTicket(Ticket tick) async {
     existTicket = ticket = tick;
 
+    var tripDirectionDetails =
+        await AssistantMethods.obtainOriginToDestinationDirectionDetails(
+            LatLng(ticket!.origin!.latitude, ticket!.origin!.longitude),
+            LatLng(
+                ticket!.destination!.latitude, ticket!.destination!.longitude));
+    //fare amount
+    double totalFareAmount =
+        AssistantMethods.calculateFareAmountFromOriginToDestination(
+            tripDirectionDetails!);
     await FirebaseFirestore.instance.collection("Tickets").doc(tick.id).update({
       "driverLocation": GeoPoint(
           driverCurrentPosition!.latitude, driverCurrentPosition!.longitude),
+      'price': totalFareAmount
     });
     startTimerTicket();
     updatePassengersIconOnMap();
@@ -443,21 +450,22 @@ class AppInfo extends ChangeNotifier {
           var data = event.data()!;
           ticket = Ticket.fromMap(data, event.id);
 
-          if (ticket!.status == "Pending") {
-            // showWaitingResponseFromDriverUI();
-          } else if (ticket!.status == 'collecting') {
+          if (ticket!.status == 'collecting') {
+            log("ticket status: ${ticket!.status}");
             updatePassengersIconOnMap();
             showUIForCollectingTicket();
 
             // showOtherPassengersOnMap();
             // showUIForAssignedDriverInfo();
           } else if (ticket!.status == 'started') {
-            updateReachingTimeToUserDropOffLocation(LatLng(
+            log("ticket status: ${ticket!.status}");
+            await updateReachingTimeToUserDropOffLocation(LatLng(
                 ticket!.driverLocation!.latitude,
                 ticket!.driverLocation!.longitude));
             showUIForStartedTicket();
             // showUIForStartedTrip();
           } else if (ticket!.status == "Cancelled") {
+            log("ticket status: ${ticket!.status}");
             // showUICancelledTicket();
 
             cancelTicket(ticket!);
@@ -495,7 +503,7 @@ class AppInfo extends ChangeNotifier {
       right: 0,
       child: Container(
         decoration: const BoxDecoration(
-          color: Colors.black,
+          color: Colors.white60,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(18),
           ),
@@ -524,13 +532,15 @@ class AppInfo extends ChangeNotifier {
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: Colors.purple,
                               )),
                           ElevatedButton.icon(
                             onPressed: () {
                               //call driver
 
-                              // launch("tel://" + ticketDriver!.phone);
+                              launchUrl(Uri(
+                                  scheme: 'tel',
+                                  path: ticket!.passengers![i].phone));
                             },
                             style: ElevatedButton.styleFrom(
                               primary: Colors.purple,
@@ -551,8 +561,7 @@ class AppInfo extends ChangeNotifier {
                           ticket!.passengers![i].isPickedUp
                               ? ElevatedButton.icon(
                                   onPressed: () {
-                                    //cancel ticket
-                                    // resignFromTicket();
+                                    // pickUpPassenger(ticket!.passengers![i]);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     primary: Colors.purple,
@@ -746,7 +755,7 @@ class AppInfo extends ChangeNotifier {
                   Row(
                     children: [
                       Text(
-                        userRideRequestDetails!.userName!,
+                        "Passengers: " + ticket!.passengers!.length.toString(),
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -756,7 +765,7 @@ class AppInfo extends ChangeNotifier {
                       const Padding(
                         padding: EdgeInsets.all(10.0),
                         child: Icon(
-                          Icons.phone_android,
+                          Icons.person,
                           color: Colors.grey,
                         ),
                       ),
@@ -872,6 +881,7 @@ class AppInfo extends ChangeNotifier {
 
                         buttonTitle = "End Trip"; //end the trip
                         buttonColor = Colors.redAccent;
+                        showUIForStartedTicket();
                       }
                       //[user/Driver reached to the dropOff Destination Location] - End Trip Button
                       else if (rideRequestStatus == "ontrip") {
@@ -896,6 +906,7 @@ class AppInfo extends ChangeNotifier {
                     ),
                   ),
                 ]))));
+    notifyListeners();
   }
 
   ///
@@ -934,7 +945,6 @@ class AppInfo extends ChangeNotifier {
         .collection("Tickets")
         .doc(tick.id)
         .update(tick.toMap());
-    notifyListeners();
   }
 
   void cancelTicket(Ticket ticket) {
@@ -943,24 +953,34 @@ class AppInfo extends ChangeNotifier {
         .collection("Tickets")
         .doc(ticket.id)
         .update(ticket.toMap());
-    notifyListeners();
   }
 
   pickUpPassenger(Passenger passenger) {
-    passenger.isPickedUp = true;
+    ticket!.passengers!
+        .firstWhere((element) => element.id == passenger.id)
+        .isPickedUp = true;
 
     if (ticket!.passengers!.every((element) => element.isPickedUp == true)) {
       ticket!.status = "started";
 
-      setOfMarkers.clear();
-      setOfCircle.clear();
-      setOfPolyline.clear();
-      polyLinePositionCoordinates.clear();
       drawPolyLineFromOriginToDestination(
           LatLng(ticket!.driverLocation!.latitude,
               ticket!.driverLocation!.longitude),
           LatLng(
               ticket!.destination!.latitude, ticket!.destination!.longitude));
+    } else {
+      var unPickedPassengers = ticket!.passengers!
+          .where((element) => element.isPickedUp == false)
+          .toList();
+
+      var unPickedPassenger = unPickedPassengers.first;
+
+      drawPolyLineFromOriginToDestination(
+        LatLng(
+            driverCurrentPosition!.latitude, driverCurrentPosition!.longitude),
+        LatLng(unPickedPassenger.origin.latitude,
+            unPickedPassenger.origin.longitude),
+      );
     }
     updateTicket(ticket!);
 
