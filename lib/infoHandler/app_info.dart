@@ -17,6 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../assistants/assistant_methods.dart';
 import '../global/global.dart';
+import '../models/trips_history_model.dart';
 import '../models/user_ride_request_information.dart';
 import '../widgets/fare_amount_collection_dialog.dart';
 import '../widgets/progress_dialog.dart';
@@ -28,6 +29,7 @@ class AppInfo extends ChangeNotifier {
   UserRideRequestInformation? userRideRequestDetails;
   Passenger? currentPassenger;
   Widget ticketInfoWidget = Container();
+  List<TripsHistoryModel> allTripsHistoryInformationList = [];
 
   GoogleMapController? newTripGoogleMapController;
   final Completer<GoogleMapController> controllerGoogleMap = Completer();
@@ -56,6 +58,11 @@ class AppInfo extends ChangeNotifier {
   String durationFromOriginToDestination = "";
 
   bool isRequestDirectionDetails = false;
+
+  int countTotalTrips = 0;
+  String driverTotalEarnings = "0";
+  String driverAverageRatings = "0";
+  List<String> historyTripsKeysList = [];
 
   Ticket? ticket;
   String? timeToArrive;
@@ -1040,5 +1047,28 @@ class AppInfo extends ChangeNotifier {
         }
       });
     }
+  }
+
+  void updateOverAllTripsHistoryInformation(TripsHistoryModel eachTripHistory) {
+    allTripsHistoryInformationList.add(eachTripHistory);
+    notifyListeners();
+  }
+
+  void updateDriverTotalEarnings(String driverEarnings) {
+    driverTotalEarnings = driverEarnings;
+  }
+
+  void updateDriverAverageRatings(String driverRatings) {
+    driverAverageRatings = driverRatings;
+  }
+
+  void updateOverAllTripsKeys(List<String> tripsKeysList) {
+    historyTripsKeysList = tripsKeysList;
+    notifyListeners();
+  }
+
+  void updateOverAllTripsCounter(int overAllTripsCounter) {
+    countTotalTrips = overAllTripsCounter;
+    notifyListeners();
   }
 }
