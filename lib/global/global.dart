@@ -4,6 +4,7 @@ import 'package:drivers_app/models/driver_data.dart';
 import 'package:drivers_app/models/ticket.dart';
 import 'package:drivers_app/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 
@@ -19,3 +20,7 @@ Position? driverCurrentPosition;
 DriverData onlineDriverData = DriverData();
 String? driverVehicleType="";
 Ticket? ticket;
+String titleStarsRating = "Good";
+bool isDriverActive = false;
+String statusText = "Now Offline";
+Color buttonColor = Colors.grey;

@@ -26,6 +26,7 @@ class Ticket {
     required this.acceptNewPassenger,
     required this.humanReadableDestination,
     required this.timer,
+    required this.price,
   });
 
   Ticket.fromMap(Map<String, dynamic> data, String documentId) {
