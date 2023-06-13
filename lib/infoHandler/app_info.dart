@@ -350,6 +350,10 @@ class AppInfo extends ChangeNotifier {
     ticket!.status = "arrived";
 
     updateTicket(ticket!);
+    Future.delayed(const Duration(seconds: 30), () {
+      // delete the ticket
+      deleteTicket(ticket!);
+    });
 
     //save fare amount to driver total earnings
     saveFareAmountToDriverEarnings(ticket!.price!);
@@ -1070,5 +1074,9 @@ class AppInfo extends ChangeNotifier {
   void updateOverAllTripsCounter(int overAllTripsCounter) {
     countTotalTrips = overAllTripsCounter;
     notifyListeners();
+  }
+
+  void deleteTicket(Ticket tick) {
+    FirebaseFirestore.instance.collection("Tickets").doc(tick.id).delete();
   }
 }

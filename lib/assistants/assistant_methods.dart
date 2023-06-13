@@ -106,7 +106,7 @@ class AssistantMethods {
     double distanceTraveledFareAmountPerKilometer =
         (directionDetailsInfo.duration_value! / 1000) * 0.1;
 
-    //USD
+    //SAR
     double totalFareAmount = timeTraveledFareAmountPerMinute +
         distanceTraveledFareAmountPerKilometer;
 
