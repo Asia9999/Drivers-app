@@ -313,10 +313,10 @@ class AppInfo extends ChangeNotifier {
     );
 
     //get the tripDirectionDetails = distance travelled
-    var currentDriverPositionLatLng = LatLng(
-      onlineDriverCurrentPosition!.latitude,
-      onlineDriverCurrentPosition!.longitude,
-    );
+    // var currentDriverPositionLatLng = LatLng(
+    //   onlineDriverCurrentPosition!.latitude,
+    //   onlineDriverCurrentPosition!.longitude,
+    // );
 
     FirebaseDatabase.instance
         .ref()
@@ -350,9 +350,11 @@ class AppInfo extends ChangeNotifier {
     ticket!.status = "arrived";
 
     updateTicket(ticket!);
-    Future.delayed(const Duration(seconds: 30), () {
+    Future.delayed(const Duration(seconds: 60), () {
       // delete the ticket
-      deleteTicket(ticket!);
+      ticket!.status = "finished";
+      updateTicket(ticket!);
+      unSubscribeToTicket();
     });
 
     //save fare amount to driver total earnings

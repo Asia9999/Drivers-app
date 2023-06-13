@@ -102,26 +102,26 @@ class AssistantMethods {
   static double calculateFareAmountFromOriginToDestination(
       DirectionDetailsInfo directionDetailsInfo) {
     double timeTraveledFareAmountPerMinute =
-        (directionDetailsInfo.duration_value! / 60) * 0.1;
+        (directionDetailsInfo.duration_value! / 60) * 1;
     double distanceTraveledFareAmountPerKilometer =
-        (directionDetailsInfo.duration_value! / 1000) * 0.1;
+        (directionDetailsInfo.duration_value! / 1000) * 1;
 
     //SAR
     double totalFareAmount = timeTraveledFareAmountPerMinute +
         distanceTraveledFareAmountPerKilometer;
 
-    totalFareAmount = totalFareAmount * 10;
-    if (driverVehicleType == "car-3seats") {
-      double resultFareAmount = (totalFareAmount.truncate()) / 2.0;
-      return resultFareAmount;
-    } else if (driverVehicleType == "car-6seats") {
+    // totalFareAmount = totalFareAmount * 10;
+    // if (driverVehicleType == "car-3seats") {
+    //   double resultFareAmount = (totalFareAmount.truncate()) / 2.0;
+    //   return resultFareAmount;
+    // } else if (driverVehicleType == "car-6seats") {
+    //   return totalFareAmount.truncate().toDouble();
+    // } else if (driverVehicleType == "car-9seats") {
+    //   double resultFareAmount = (totalFareAmount.truncate()) * 2.0;
+    //   return resultFareAmount;
+    // } else {
       return totalFareAmount.truncate().toDouble();
-    } else if (driverVehicleType == "car-9seats") {
-      double resultFareAmount = (totalFareAmount.truncate()) * 2.0;
-      return resultFareAmount;
-    } else {
-      return totalFareAmount.truncate().toDouble();
-    }
+    // }
   }
 
 

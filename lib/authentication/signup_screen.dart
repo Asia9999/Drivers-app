@@ -21,7 +21,7 @@ class _SignUpScreenState extends State<SignUpScreen>
   TextEditingController emailTextEditingController = TextEditingController();
   TextEditingController phoneTextEditingController = TextEditingController();
   TextEditingController passwordTextEditingController = TextEditingController();
-
+  bool active =false;
 
 
 
@@ -76,6 +76,7 @@ class _SignUpScreenState extends State<SignUpScreen>
          "name": nameTextEditingController.text.trim(),
          "email" :emailTextEditingController.text.trim(),
          "phone":phoneTextEditingController.text.trim(),
+         "active":false,
        };
        //all driver information
      DatabaseReference driverRef =  FirebaseDatabase.instance.ref().child("drivers");
